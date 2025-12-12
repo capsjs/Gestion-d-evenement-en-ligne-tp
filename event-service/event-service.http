@@ -1,0 +1,139 @@
+### Variables
+@baseUrl = http://localhost:8081
+@contentType = application/json
+
+### 1. GET - Récupérer tous les événements
+GET {{baseUrl}}/api/events
+
+### 2. POST - Créer un événement
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Concert de Jazz",
+  "description": "Un superbe concert de jazz en plein air avec des artistes internationaux",
+  "dateDebut": "2025-12-20T19:00:00",
+  "dateFin": "2025-12-20T23:00:00",
+  "lieu": "Paris, Bercy",
+  "categorie": "CONCERT",
+  "capaciteMax": 500,
+  "organisateurId": 1,
+  "imageUrl": "https://example.com/concert-jazz.jpg"
+}
+
+### 3. POST - Créer un autre événement (Formation)
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Formation Spring Boot",
+  "description": "Formation complète sur Spring Boot et les microservices",
+  "dateDebut": "2025-12-15T09:00:00",
+  "dateFin": "2025-12-15T17:00:00",
+  "lieu": "Lyon",
+  "categorie": "FORMATION",
+  "capaciteMax": 30,
+  "organisateurId": 1,
+  "imageUrl": "https://example.com/spring-boot.jpg"
+}
+
+### 4. GET - Récupérer un événement par ID (remplacer {id} par l'ID réel)
+GET {{baseUrl}}/api/events/1
+
+### 5. PUT - Mettre à jour un événement
+PUT {{baseUrl}}/api/events/1
+Content-Type: {{contentType}}
+
+{
+  "titre": "Concert de Jazz - COMPLET",
+  "description": "Un superbe concert de jazz en plein air avec des artistes internationaux - DERNIÈRES PLACES",
+  "lieu": "Paris, AccorHotels Arena"
+}
+
+### 6. POST - Publier un événement (passer de BROUILLON à PUBLIE)
+POST {{baseUrl}}/api/events/1/publish
+
+### 7. POST - Annuler un événement
+POST {{baseUrl}}/api/events/1/cancel
+Content-Type: {{contentType}}
+
+{
+  "reason": "Annulé pour raisons météorologiques"
+}
+
+### 8. GET - Récupérer les événements à venir
+GET {{baseUrl}}/api/events/upcoming
+
+### 9. GET - Récupérer les événements en cours
+GET {{baseUrl}}/api/events/ongoing
+
+### 10. GET - Rechercher des événements par catégorie
+GET {{baseUrl}}/api/events/search?categorie=CONCERT
+
+### 11. GET - Rechercher des événements par organisateur
+GET {{baseUrl}}/api/events/search?organisateurId=1
+
+### 12. DELETE - Supprimer un événement (seulement en BROUILLON)
+DELETE {{baseUrl}}/api/events/1
+
+### 13. POST - Créer un événement THEATRE
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Molière - Le Misanthrope",
+  "description": "Représentation classique de la pièce de Molière",
+  "dateDebut": "2025-12-18T20:00:00",
+  "dateFin": "2025-12-18T22:30:00",
+  "lieu": "Comédie Française, Paris",
+  "categorie": "THEATRE",
+  "capaciteMax": 200,
+  "organisateurId": 2,
+  "imageUrl": "https://example.com/moliere.jpg"
+}
+
+### 14. POST - Créer un événement SPORT
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Marathon de Paris 2026",
+  "description": "42ème édition du marathon de Paris",
+  "dateDebut": "2026-04-05T08:00:00",
+  "dateFin": "2026-04-05T15:00:00",
+  "lieu": "Paris - Champs-Élysées",
+  "categorie": "SPORT",
+  "capaciteMax": 50000,
+  "organisateurId": 3,
+  "imageUrl": "https://example.com/marathon.jpg"
+}
+
+### 15. POST - Test validation - Titre trop court (doit échouer)
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "AB",
+  "description": "Test validation",
+  "dateDebut": "2025-12-20T19:00:00",
+  "dateFin": "2025-12-20T23:00:00",
+  "lieu": "Paris",
+  "categorie": "CONCERT",
+  "capaciteMax": 100,
+  "organisateurId": 1
+}
+
+### 16. POST - Test validation - Date dans le passé (doit échouer)
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Événement passé",
+  "description": "Test validation",
+  "dateDebut": "2020-01-01T19:00:00",
+  "dateFin": "2020-01-01T23:00:00",
+  "lieu": "Paris",
+  "categorie": "CONCERT",
+  "capaciteMax": 100,
+  "organisateurId": 1
+}

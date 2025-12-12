@@ -2,6 +2,7 @@ package com.eventplatform.event_service.service;
 
 import com.eventplatform.event_service.dto.CreateEventRequest;
 import com.eventplatform.event_service.dto.EventResponse;
+import com.eventplatform.event_service.dto.UpdateEventRequest;
 import com.eventplatform.event_service.model.Event;
 import com.eventplatform.event_service.model.EventStatus;
 import org.springframework.stereotype.Component;
@@ -54,5 +55,38 @@ public class EventMapper {
         .isModifiable(event.isModifiable())
         .isAnnulable(event.isAnnulable())
         .build();
+  }
+
+  /**
+   * Met à jour une entité Event avec les données d'un UpdateEventRequest
+   */
+  public void updateEntity(Event event, UpdateEventRequest request) {
+    if (request.getTitre() != null) {
+      event.setTitre(request.getTitre());
+    }
+    if (request.getDescription() != null) {
+      event.setDescription(request.getDescription());
+    }
+    if (request.getDateDebut() != null) {
+      event.setDateDebut(request.getDateDebut());
+    }
+    if (request.getDateFin() != null) {
+      event.setDateFin(request.getDateFin());
+    }
+    if (request.getLieu() != null) {
+      event.setLieu(request.getLieu());
+    }
+    if (request.getCategorie() != null) {
+      event.setCategorie(request.getCategorie());
+    }
+    if (request.getCapaciteMax() != null) {
+      // Ajuster les places disponibles proportionnellement
+      int difference = request.getCapaciteMax() - event.getCapaciteMax();
+      event.setCapaciteMax(request.getCapaciteMax());
+      event.setPlacesDisponibles(Math.max(0, event.getPlacesDisponibles() + difference));
+    }
+    if (request.getImageUrl() != null) {
+      event.setImageUrl(request.getImageUrl());
+    }
   }
 }
