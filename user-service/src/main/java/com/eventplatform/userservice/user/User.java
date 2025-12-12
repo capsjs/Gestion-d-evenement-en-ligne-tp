@@ -1,35 +1,36 @@
-package.com.eventplatform.userservice.user;
+package com.eventplatform.userservice.user;
 
 import jakarta.persistence.*;
+
 @Entity
-@Table(name= "users")
+@Table(name = "users")
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false )
+    @Column(nullable = false)
     private String firstName;
 
-    @Column(nullable = false )
-    private String LastName;
+    @Column(nullable = false)
+    private String lastName;
 
-    @Column(nullable = false, unique = true )
+    @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false )
+    @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false )
+    @Column(nullable = false)
     private String role;
 
-    public User(){
+    public User() {
     }
 
     public User(String firstName, String lastName, String email, String password, String role) {
         this.firstName = firstName;
-        this.LastName = lastName;
+        this.lastName = lastName;
         this.email = email;
         this.password = password;
         this.role = role;
@@ -52,7 +53,7 @@ public class User {
     }
 
     public String getLastName() {
-        return LastName;
+        return lastName;
     }
 
     public void setLastName(String lastName) {
@@ -82,5 +83,4 @@ public class User {
     public void setRole(String role) {
         this.role = role;
     }
-
 }

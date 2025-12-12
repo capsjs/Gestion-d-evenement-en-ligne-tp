@@ -1,4 +1,4 @@
-package com.eventplatform.user_service;
+package com.eventplatform.userservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
