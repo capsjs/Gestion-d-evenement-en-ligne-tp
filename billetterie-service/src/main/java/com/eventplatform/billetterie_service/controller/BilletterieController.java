@@ -8,7 +8,7 @@ import com.eventplatform.billetterie_service.dto.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/tickets")
+@RequestMapping("/api/tickets")
 public class BilletterieController {
 
     private final BilletterieService billetterieService;
