@@ -28,7 +28,7 @@ services:
     container_name: rabbitmq
     ports:
       - "5673:5672"
-      - "15673:15672" 
+      - "15673:15672"
 
   event-service:
     build:
@@ -61,6 +61,18 @@ services:
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_RABBITMQ_HOST: rabbitmq
       EVENT_SERVICE_URL: http://event-service:8083
+
+  notification-service:
+    build:
+      context: ./notification-service
+    container_name: notification_service
+    ports:
+      - "8085:8084"
+    depends_on:
+      - rabbitmq
+    environment:
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
 
 volumes:
   postgres_data:

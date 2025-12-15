@@ -32,4 +32,9 @@ public class NotificationConsumers {
     public Consumer<EventCancelledIncoming> onEventCancelled() {
         return e -> service.send(NotificationEventAdapter.from(e));
     }
+
+    @Bean
+    public Consumer<PaymentProcessedIncoming> onPaymentProcessed() {
+        return service::onPaymentProcessed;
+    }
 }
