@@ -1,0 +1,164 @@
+### ========================================
+### TESTS DES ENDPOINTS INTERNES
+### Pour billetterie-service
+### ========================================
+
+### Variables
+@baseUrl = http://localhost:8081
+@contentType = application/json
+
+### ========================================
+### PRÉPARATION: Créer et publier un événement de test
+### ========================================
+
+### 1. Créer un événement de test pour les endpoints internes
+# @name createTestEvent
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Test Événement pour API Interne",
+  "description": "Événement pour tester les endpoints decrease/increase seats",
+  "dateDebut": "2025-12-25T20:00:00",
+  "dateFin": "2025-12-25T23:00:00",
+  "lieu": "Paris, Test Arena",
+  "categorie": "CONCERT",
+  "statut": "BROUILLON",
+  "capaciteMax": 100,
+  "organisateurId": 1,
+  "imageUrl": "https://example.com/test.jpg"
+}
+
+### 2. Récupérer l'ID de l'événement créé
+@testEventId = {{createTestEvent.response.body.id}}
+
+### 3. Publier l'événement pour le rendre réservable
+POST {{baseUrl}}/api/events/{{testEventId}}/publish
+
+### 4. Vérifier l'état initial de l'événement
+# Capacité: 100, Places disponibles: 100
+GET {{baseUrl}}/api/events/{{testEventId}}
+
+### ========================================
+### TESTS ENDPOINTS INTERNES
+### ========================================
+
+### 5. TEST: Réduire les places disponibles (Réservation de 5 places)
+# ✅ DOIT RÉUSSIR: 100 - 5 = 95 places disponibles
+POST {{baseUrl}}/api/events/internal/{{testEventId}}/decrease-seats?quantity=5
+
+### 6. Vérifier que les places ont été réduites
+# Attendu: placesDisponibles = 95
+GET {{baseUrl}}/api/events/{{testEventId}}
+
+### 7. TEST: Réduire encore 10 places (Nouvelle réservation)
+# ✅ DOIT RÉUSSIR: 95 - 10 = 85 places disponibles
+POST {{baseUrl}}/api/events/internal/{{testEventId}}/decrease-seats?quantity=10
+
+### 8. Vérifier l'état après la 2ème réservation
+# Attendu: placesDisponibles = 85
+GET {{baseUrl}}/api/events/{{testEventId}}
+
+### 9. TEST: Augmenter les places (Annulation de 3 places)
+# ✅ DOIT RÉUSSIR: 85 + 3 = 88 places disponibles
+POST {{baseUrl}}/api/events/internal/{{testEventId}}/increase-seats?quantity=3
+
+### 10. Vérifier l'état après l'annulation
+# Attendu: placesDisponibles = 88
+GET {{baseUrl}}/api/events/{{testEventId}}
+
+### 11. TEST: Réduire 80 places d'un coup (Grosse réservation)
+# ✅ DOIT RÉUSSIR: 88 - 80 = 8 places disponibles
+POST {{baseUrl}}/api/events/internal/{{testEventId}}/decrease-seats?quantity=80
+
+### 12. Vérifier qu'il reste 8 places
+GET {{baseUrl}}/api/events/{{testEventId}}
+
+### 13. TEST: Tenter de réduire 10 places alors qu'il n'en reste que 8
+# ❌ DOIT ÉCHOUER: 400 Bad Request - Pas assez de places
+POST {{baseUrl}}/api/events/internal/{{testEventId}}/decrease-seats?quantity=10
+
+### 14. TEST: Augmenter les places au-delà de la capacité max
+# Les places ne peuvent pas dépasser capaciteMax (100)
+# Augmenter de 100 places: 8 + 100 = 108, mais limité à 100
+POST {{baseUrl}}/api/events/internal/{{testEventId}}/increase-seats?quantity=100
+
+### 15. Vérifier que les places sont limitées à la capacité max
+# Attendu: placesDisponibles = 100 (capacité max)
+GET {{baseUrl}}/api/events/{{testEventId}}
+
+### ========================================
+### TESTS AVEC IDs FIXES (si vous avez déjà des événements en DB)
+### ========================================
+
+### 16. TEST: Réduire 5 places sur l'événement ID 1
+POST {{baseUrl}}/api/events/internal/1/decrease-seats?quantity=5
+
+### 17. Vérifier l'événement ID 1
+GET {{baseUrl}}/api/events/1
+
+### 18. TEST: Augmenter 2 places sur l'événement ID 1
+POST {{baseUrl}}/api/events/internal/1/increase-seats?quantity=2
+
+### 19. Vérifier l'événement ID 1 après augmentation
+GET {{baseUrl}}/api/events/1
+
+### ========================================
+### TESTS D'ERREURS
+### ========================================
+
+### 20. TEST: Événement inexistant (404)
+# ❌ DOIT ÉCHOUER: 404 Not Found
+POST {{baseUrl}}/api/events/internal/99999/decrease-seats?quantity=5
+
+### 21. TEST: Quantité négative (validation)
+# ❌ Comportement attendu dépend de la validation
+POST {{baseUrl}}/api/events/internal/{{testEventId}}/decrease-seats?quantity=-5
+
+### 22. TEST: Quantité zéro
+# ✅ Devrait réussir sans rien changer
+POST {{baseUrl}}/api/events/internal/{{testEventId}}/decrease-seats?quantity=0
+
+### 23. Vérifier que rien n'a changé
+GET {{baseUrl}}/api/events/{{testEventId}}
+
+### ========================================
+### SCÉNARIO COMPLET: Cycle de vie d'une réservation
+### ========================================
+
+### 24. Créer un nouvel événement pour le scénario complet
+# @name scenarioEvent
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Concert Complet - Scénario Test",
+  "description": "Test du cycle de vie complet d'une réservation",
+  "dateDebut": "2025-12-30T19:00:00",
+  "dateFin": "2025-12-30T23:00:00",
+  "lieu": "Lyon",
+  "categorie": "CONCERT",
+  "statut": "BROUILLON",
+  "capaciteMax": 50,
+  "organisateurId": 1
+}
+
+### 25. Publier l'événement
+@scenarioEventId = {{scenarioEvent.response.body.id}}
+POST {{baseUrl}}/api/events/{{scenarioEventId}}/publish
+
+### 26. BILLETTERIE: Réservation de 10 places par User 1
+POST {{baseUrl}}/api/events/internal/{{scenarioEventId}}/decrease-seats?quantity=10
+
+### 27. BILLETTERIE: Réservation de 5 places par User 2
+POST {{baseUrl}}/api/events/internal/{{scenarioEventId}}/decrease-seats?quantity=5
+
+### 28. Vérifier l'état (50 - 10 - 5 = 35 places disponibles)
+GET {{baseUrl}}/api/events/{{scenarioEventId}}
+
+### 29. BILLETTERIE: User 1 annule sa réservation (libère 10 places)
+POST {{baseUrl}}/api/events/internal/{{scenarioEventId}}/increase-seats?quantity=10
+
+### 30. Vérifier l'état final (35 + 10 = 45 places disponibles)
+GET {{baseUrl}}/api/events/{{scenarioEventId}}
+
