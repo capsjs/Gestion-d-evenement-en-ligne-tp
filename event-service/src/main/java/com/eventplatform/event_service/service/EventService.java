@@ -37,6 +37,19 @@ public class EventService {
     // Validation des dates
     validateEventDates(request.getDateDebut(), request.getDateFin());
 
+    // Vérification des doublons
+    if (eventRepository.existsByTitreAndDateDebutAndLieu(
+        request.getTitre(),
+        request.getDateDebut(),
+        request.getLieu())) {
+      log.warn("Tentative de création d'un événement en doublon: {} à {} le {}",
+          request.getTitre(), request.getLieu(), request.getDateDebut());
+      throw new DuplicateEventException(
+          request.getTitre(),
+          request.getLieu(),
+          request.getDateDebut().toString());
+    }
+
     // Création de l'entité
     Event event = eventMapper.toEntity(request);
     event = eventRepository.save(event);

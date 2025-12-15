@@ -7,7 +7,8 @@ import java.time.LocalDateTime;
 
 /**
  * Entité représentant un événement dans le système.
- * Correspond au diagramme de classes et au diagramme d'états définis dans l'architecture.
+ * Correspond au diagramme de classes et au diagramme d'états définis dans
+ * l'architecture.
  */
 @Entity
 @Table(name = "events")
@@ -37,11 +38,11 @@ public class Event {
     @Column(nullable = false)
     private String lieu;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     @Enumerated(EnumType.STRING)
     private EventCategory categorie;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "VARCHAR(50)")
     @Enumerated(EnumType.STRING)
     private EventStatus statut;
 
@@ -97,8 +98,8 @@ public class Event {
      * Vérifie si des billets peuvent être réservés
      */
     public boolean isReservable() {
-        return statut == EventStatus.PUBLIE && 
-               placesDisponibles > 0 && 
-               LocalDateTime.now().isBefore(dateDebut);
+        return statut == EventStatus.PUBLIE &&
+                placesDisponibles > 0 &&
+                LocalDateTime.now().isBefore(dateDebut);
     }
 }

@@ -37,20 +37,19 @@ public interface EventRepository extends JpaRepository<Event, Long> {
      * Recherche avancée avec filtres multiples
      */
     @Query("SELECT e FROM Event e WHERE " +
-           "(:categorie IS NULL OR e.categorie = :categorie) AND " +
-           "(:statut IS NULL OR e.statut = :statut) AND " +
-           "(:dateDebut IS NULL OR e.dateDebut >= :dateDebut) AND " +
-           "(:dateFin IS NULL OR e.dateFin <= :dateFin) AND " +
-           "(:lieu IS NULL OR LOWER(e.lieu) LIKE LOWER(CONCAT('%', :lieu, '%'))) AND " +
-           "(:titre IS NULL OR LOWER(e.titre) LIKE LOWER(CONCAT('%', :titre, '%')))")
+            "(:categorie IS NULL OR e.categorie = :categorie) AND " +
+            "(:statut IS NULL OR e.statut = :statut) AND " +
+            "(:dateDebut IS NULL OR e.dateDebut >= :dateDebut) AND " +
+            "(:dateFin IS NULL OR e.dateFin <= :dateFin) AND " +
+            "(:lieu IS NULL OR LOWER(e.lieu) LIKE LOWER(CONCAT('%', :lieu, '%'))) AND " +
+            "(:titre IS NULL OR LOWER(e.titre) LIKE LOWER(CONCAT('%', :titre, '%')))")
     List<Event> searchEvents(
-        @Param("categorie") EventCategory categorie,
-        @Param("statut") EventStatus statut,
-        @Param("dateDebut") LocalDateTime dateDebut,
-        @Param("dateFin") LocalDateTime dateFin,
-        @Param("lieu") String lieu,
-        @Param("titre") String titre
-    );
+            @Param("categorie") EventCategory categorie,
+            @Param("statut") EventStatus statut,
+            @Param("dateDebut") LocalDateTime dateDebut,
+            @Param("dateFin") LocalDateTime dateFin,
+            @Param("lieu") String lieu,
+            @Param("titre") String titre);
 
     /**
      * Trouve les événements à venir (publiés et non commencés)
@@ -62,7 +61,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
      * Trouve les événements en cours
      */
     @Query("SELECT e FROM Event e WHERE e.statut = 'EN_COURS' OR " +
-           "(e.statut = 'PUBLIE' AND e.dateDebut <= :now AND e.dateFin >= :now)")
+            "(e.statut = 'PUBLIE' AND e.dateDebut <= :now AND e.dateFin >= :now)")
     List<Event> findOngoingEvents(@Param("now") LocalDateTime now);
 
     /**
@@ -75,4 +74,18 @@ public interface EventRepository extends JpaRepository<Event, Long> {
      * Compte les événements d'un organisateur par statut
      */
     Long countByOrganisateurIdAndStatut(Long organisateurId, EventStatus statut);
+
+    /**
+     * Vérifie si un événement existe déjà avec le même titre, date de début et lieu
+     * (pour éviter les doublons)
+     */
+    @Query("SELECT COUNT(e) > 0 FROM Event e WHERE " +
+            "LOWER(e.titre) = LOWER(:titre) AND " +
+            "e.dateDebut = :dateDebut AND " +
+            "LOWER(e.lieu) = LOWER(:lieu) AND " +
+            "e.statut != 'ANNULE'")
+    boolean existsByTitreAndDateDebutAndLieu(
+            @Param("titre") String titre,
+            @Param("dateDebut") LocalDateTime dateDebut,
+            @Param("lieu") String lieu);
 }
