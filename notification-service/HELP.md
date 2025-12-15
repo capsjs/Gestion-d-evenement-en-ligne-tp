@@ -1,7 +1,7 @@
 # Read Me First
 The following was discovered as part of building this project:
 
-* The original package name 'com.eventplatform.notification-service' is invalid and this project uses 'com.eventplatform.notification_service' instead.
+* The original package name 'com.eventplatform.notificationservice-service' is invalid and this project uses 'com.eventplatform.notificationservice' instead.
 
 # Getting Started
 
