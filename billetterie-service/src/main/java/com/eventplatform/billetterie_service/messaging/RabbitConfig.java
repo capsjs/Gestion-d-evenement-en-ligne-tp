@@ -1,47 +1,37 @@
 package com.eventplatform.billetterie_service.messaging;
 
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Queue;
-import org.springframework.amqp.core.TopicExchange;
+import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class RabbitConfig {
 
-    public static final String TICKET_EXCHANGE = "ticket.exchange";
-    public static final String TICKET_BOOKED_QUEUE = "ticket.booked.queue";
-    public static final String TICKET_CANCELLED_QUEUE = "ticket.cancelled.queue";
+    public static final String EVENT_EXCHANGE = "event-platform.exchange";
+    public static final String BILLETTERIE_QUEUE = "billetterie.queue";
 
     @Bean
-    public TopicExchange ticketExchange() {
-        return new TopicExchange(TICKET_EXCHANGE);
+    public TopicExchange eventExchange() {
+        return new TopicExchange(EVENT_EXCHANGE);
     }
 
     @Bean
-    public Queue ticketBookedQueue() {
-        return new Queue(TICKET_BOOKED_QUEUE);
+    public Queue billetterieQueue() {
+        return QueueBuilder.durable(BILLETTERIE_QUEUE).build();
     }
-
     @Bean
-    public Queue ticketCancelledQueue() {
-        return new Queue(TICKET_CANCELLED_QUEUE);
-    }
-
-    @Bean
-    public Binding bookedBinding() {
+    public Binding paymentProcessedBinding() {
         return BindingBuilder
-                .bind(ticketBookedQueue())
-                .to(ticketExchange())
-                .with("ticket.booked");
+                .bind(billetterieQueue())
+                .to(eventExchange())
+                .with("payment.processed");
     }
 
     @Bean
-    public Binding cancelledBinding() {
+    public Binding paymentFailedBinding() {
         return BindingBuilder
-                .bind(ticketCancelledQueue())
-                .to(ticketExchange())
-                .with("ticket.cancelled");
+                .bind(billetterieQueue())
+                .to(eventExchange())
+                .with("payment.failed");
     }
 }

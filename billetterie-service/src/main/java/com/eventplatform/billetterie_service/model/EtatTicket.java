@@ -6,5 +6,6 @@ public enum EtatTicket {
     EN_ATTENTE_PAIEMENT,
     PAYE,
     ANNULE,
+    UTILISE,
     EXPIRE,
 }

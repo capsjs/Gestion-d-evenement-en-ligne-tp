@@ -68,18 +68,41 @@ public class BilletterieService {
         Ticket t = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
+        EtatTicket etat = t.getEtat();
+        if (etat == EtatTicket.UTILISE || etat == EtatTicket.EXPIRE || etat == EtatTicket.ANNULE) {
+            throw new RuntimeException("Ticket dans un mauvais état");
+        }
+
         t.setEtat(EtatTicket.ANNULE);
         t = ticketRepository.save(t);
+
+        UUID eventId = t.getEventId();
+        EventSeat seat = eventSeatRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Evenement non trouvé"));
+        seat.setRemainingSeats(seat.getRemainingSeats() + 1);
 
         // EVENT
         ticketEventPublisher.publishTicketCancelled(
                 new TicketCancelledEvent(
                         t.getId(),
                         t.getEventId(),
-                        t.getUserId()
-                )
-        );
+                        t.getUserId()));
 
         return t;
     }
+
+    @Transactional
+    public void confirmTicket(UUID ticketId) {
+    Ticket ticket = ticketRepository.findById(ticketId)
+            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+
+    // On accepte la confirmation seulement si le ticket est réservé
+    if (ticket.getEtat() != EtatTicket.RESERVE) {
+        throw new RuntimeException("Ticket non confirmable");
+    }
+
+    ticket.setEtat(EtatTicket.PAYE);
+    ticketRepository.save(ticket);
+}
+
 }
