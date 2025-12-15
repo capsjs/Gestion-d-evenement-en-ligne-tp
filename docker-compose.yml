@@ -25,7 +25,7 @@ services:
       context: ./billetterie-service
     container_name: billetterie_service
     ports:
-      - "8081:8080"
+      - "8082:8082"
     depends_on:
       - postgres
       - rabbitmq
