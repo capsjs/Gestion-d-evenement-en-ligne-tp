@@ -1,9 +1,0 @@
-com/eventplatform/notificationservice/messaging/NotificationConsumers.class
-com/eventplatform/notificationservice/notification/NotificationService.class
-com/eventplatform/notificationservice/dto/incoming/EventUpdatedIncoming.class
-com/eventplatform/notificationservice/channel/NotificationSender.class
-com/eventplatform/notificationservice/dto/incoming/EventCancelledIncoming.class
-com/eventplatform/notificationservice/NotificationServiceApplication.class
-com/eventplatform/notificationservice/adapter/NotificationEventAdapter.class
-com/eventplatform/notificationservice/domain/EventNotification.class
-com/eventplatform/notificationservice/dto/incoming/EventCreatedIncoming.class
