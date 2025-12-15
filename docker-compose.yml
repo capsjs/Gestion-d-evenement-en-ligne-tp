@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  postgres:
+  postgres_billeterie:
     image: postgres:15
     container_name: postgres_billetterie
     environment:
@@ -13,27 +11,57 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
+  postgres_event:
+    image: postgres:15
+    container_name: postgres_event
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: event_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_event_data:/var/lib/postgresql/data
+
   rabbitmq:
     image: rabbitmq:3-management
-    container_name: rabbitmq_billetterie
+    container_name: rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5673:5672"
+      - "15673:15672"
+
+  event-service:
+    build:
+      context: ./event-service
+    container_name: event_service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres_event
+      - rabbitmq
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_event:5432/event_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_RABBITMQ_HOST: rabbitmq
 
   billetterie-service:
     build:
       context: ./billetterie-service
     container_name: billetterie_service
     ports:
-      - "8082:8082"
+      - "8082:8080"
     depends_on:
-      - postgres
+      - postgres_billeterie
       - rabbitmq
+      - event-service
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/billetteriedb
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_billeterie:5432/billetteriedb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_RABBITMQ_HOST: rabbitmq
+      EVENT_SERVICE_URL: http://event-service:8083
 
 volumes:
   postgres_data:
+  postgres_event_data:
