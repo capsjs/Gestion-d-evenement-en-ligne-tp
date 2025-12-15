@@ -22,6 +22,7 @@ services:
       - "5433:5432"
     volumes:
       - postgres_event_data:/var/lib/postgresql/data
+      - ./event-service/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   rabbitmq:
     image: rabbitmq:3-management
@@ -35,7 +36,7 @@ services:
       context: ./event-service
     container_name: event_service
     ports:
-      - "8083:8083"
+      - "8084:8084"
     depends_on:
       - postgres_event
       - rabbitmq
@@ -60,7 +61,7 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_RABBITMQ_HOST: rabbitmq
-      EVENT_SERVICE_URL: http://event-service:8083
+      EVENT_SERVICE_URL: http://event-service:8084
 
   notification-service:
     build:
