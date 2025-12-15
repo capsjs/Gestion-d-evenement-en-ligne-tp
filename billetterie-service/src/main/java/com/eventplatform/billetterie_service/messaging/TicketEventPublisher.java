@@ -1,10 +1,10 @@
 package com.eventplatform.billetterie_service.messaging;
 
-import com.eventplatform.billetterie_service.dto.TicketBookedEvent;
-import com.eventplatform.billetterie_service.dto.TicketCancelledEvent;
-
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Component;
+
+import com.eventplatform.billetterie_service.dto.TicketBookedEvent;
+import com.eventplatform.billetterie_service.dto.TicketCancelledEvent;
 
 @Component
 public class TicketEventPublisher {
