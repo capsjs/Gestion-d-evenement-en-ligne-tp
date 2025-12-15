@@ -1,7 +1,7 @@
-package com.eventplatform.paiement_service.controllers;
+package com.eventplatform.paiement_service.controllers; 
 
 import com.eventplatform.paiement_service.entities.Payment;
-import com.eventplatform.paiement_service.service.PaymentService;
+import com.eventplatform.paiement_service.services.PaymentService; 
 import com.eventplatform.paiement_service.web.dto.PaymentResponseDTO;
 import com.eventplatform.paiement_service.web.mapper.PaymentMapper;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID; 
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,7 +31,18 @@ public class PaymentController {
 
     @GetMapping("/{bookingId}")
     public ResponseEntity<PaymentResponseDTO> getPayment(@PathVariable String bookingId) {
-        Payment payment = paymentService.getPaymentByBookingId(bookingId);
-        return ResponseEntity.ok(paymentMapper.toDTO(payment));
+        try {
+            
+            Payment payment = paymentService.getPaymentByBookingId(UUID.fromString(bookingId));
+            return ResponseEntity.ok(paymentMapper.toDTO(payment));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    
+    @PostMapping
+    public Payment createPayment(@RequestBody Payment payment) {
+       
+        return paymentService.createPayment(payment);
     }
 }
