@@ -16,7 +16,7 @@ spring:
                 - Path=/api/users/**
 
             - id: event-service
-              uri: http://localhost:8083
+              uri: http://localhost:8084
               predicates:
                 - Path=/api/events/**
                 -

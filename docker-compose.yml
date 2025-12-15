@@ -19,7 +19,7 @@ services:
       context: ./billetterie-service
     container_name: billetterie_service
     ports:
-      - "8082:8080"
+      - "8082:8082"
     depends_on:
       - postgres_billeterie
       - rabbitmq
@@ -29,7 +29,9 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_RABBITMQ_HOST: rabbitmq
-      EVENT_SERVICE_URL: http://event-service:8083
+      SPRING_RABBITMQ_PORT: 5672
+      EVENT_SERVICE_URL: http://event-service:8084
+      SERVER_PORT: 8082
 
   # --- 2. Service EVENT ---
   postgres_event:
@@ -59,8 +61,10 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SERVER_PORT: 8084
 
-  # --- 3. Service PAIEMENT (Nouveau !) ---
+  # --- 3. Service PAIEMENT ---
   postgres_payment:
     image: postgres:15
     container_name: postgres_payment
@@ -69,7 +73,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: payment_db
     ports:
-      - "5434:5432" # Port externe 5434 pour éviter les conflits
+      - "5434:5432"
     volumes:
       - postgres_payment_data:/var/lib/postgresql/data
 
@@ -78,18 +82,18 @@ services:
       context: ./paiement-service
     container_name: paiement_service
     ports:
-      - "8081:8083"
+      - "8083:8083"
     depends_on:
       - postgres_payment
       - rabbitmq
     environment:
-      # Configuration spécifique Docker
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_payment:5432/payment_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgres
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
+      SERVER_PORT: 8083
 
   # --- 4. Service NOTIFICATION ---
   notification-service:
@@ -97,23 +101,24 @@ services:
       context: ./notification-service
     container_name: notification_service
     ports:
-      - "8085:8084"
+      - "8085:8085"
     depends_on:
       - rabbitmq
     environment:
       SPRING_RABBITMQ_HOST: rabbitmq
       SPRING_RABBITMQ_PORT: 5672
+      SERVER_PORT: 8085
 
   # --- 5. Service USERS ---
   postgres_users:
-    image: postgres:16
+    image: postgres:15
     container_name: postgres_users
     environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
       POSTGRES_DB: usersdb
-      POSTGRES_USER: users_user
-      POSTGRES_PASSWORD: users_password
     ports:
-      - "5434:5432"
+      - "5435:5432"
     volumes:
       - postgres_users_data:/var/lib/postgresql/data
 
@@ -125,18 +130,21 @@ services:
       - "8081:8081"
     depends_on:
       - postgres_users
+      - event-service
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_users:5432/usersdb
-      SPRING_DATASOURCE_USERNAME: users_user
-      SPRING_DATASOURCE_PASSWORD: users_password
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      EVENT_SERVICE_URL: http://event-service:8084
+      SERVER_PORT: 8081
 
   # --- INFRASTRUCTURE PARTAGÉE ---
   rabbitmq:
     image: rabbitmq:3-management
     container_name: rabbitmq
     ports:
-      - "5673:5672"   
-      - "15673:15672" 
+      - "5672:5672"   
+      - "15672:15672"
 
 volumes:
   postgres_data:
