@@ -43,13 +43,14 @@ services:
       - "5433:5432"
     volumes:
       - postgres_event_data:/var/lib/postgresql/data
+      - ./event-service/init.sql:/docker-entrypoint-initdb.d/init.sql
 
   event-service:
     build:
       context: ./event-service
     container_name: event_service
     ports:
-      - "8083:8083"
+      - "8084:8084"
     depends_on:
       - postgres_event
       - rabbitmq
