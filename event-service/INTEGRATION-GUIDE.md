@@ -4,8 +4,8 @@
 
 Le **Event Service** expose des endpoints REST et publie des événements RabbitMQ pour la communication inter-services.
 
-**Port**: `8081`  
-**Base URL**: `http://localhost:8081`
+**Port**: `8083`  
+**Base URL**: `http://localhost:8083`
 
 ---
 
@@ -15,13 +15,13 @@ Le **Event Service** expose des endpoints REST et publie des événements Rabbit
 
 ```http
 # 1. Vérifier qu'un événement existe et a des places
-GET http://localhost:8081/api/events/{eventId}
+GET http://localhost:8083/api/events/{eventId}
 
 # 2. Réduire les places lors d'une réservation
-POST http://localhost:8081/api/events/internal/{eventId}/decrease-seats?quantity=5
+POST http://localhost:8083/api/events/internal/{eventId}/decrease-seats?quantity=5
 
 # 3. Libérer les places lors d'une annulation
-POST http://localhost:8081/api/events/internal/{eventId}/increase-seats?quantity=5
+POST http://localhost:8083/api/events/internal/{eventId}/increase-seats?quantity=5
 ```
 
 ### Événements RabbitMQ à écouter
@@ -100,7 +100,7 @@ public void handleEventCancelled(EventCancelledEvent event) {
 
 ```http
 # Récupérer tous les événements d'un organisateur
-GET http://localhost:8081/api/events/search?organisateurId={userId}
+GET http://localhost:8083/api/events/search?organisateurId={userId}
 ```
 
 ---
@@ -207,19 +207,19 @@ public class EventCancelledEvent implements Serializable {
 
 **Déclencher un EventCreatedEvent:**
 ```bash
-curl -X POST http://localhost:8081/api/events/1/publish
+curl -X POST http://localhost:8083/api/events/1/publish
 ```
 
 **Déclencher un EventUpdatedEvent:**
 ```bash
-curl -X PUT http://localhost:8081/api/events/1 \
+curl -X PUT http://localhost:8083/api/events/1 \
   -H "Content-Type: application/json" \
   -d '{"titre": "Titre modifié"}'
 ```
 
 **Déclencher un EventCancelledEvent:**
 ```bash
-curl -X POST http://localhost:8081/api/events/1/cancel \
+curl -X POST http://localhost:8083/api/events/1/cancel \
   -H "Content-Type: application/json" \
   -d '{"reason": "Test annulation"}'
 ```

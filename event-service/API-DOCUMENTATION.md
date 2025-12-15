@@ -13,8 +13,8 @@
 ## 🌐 Informations générales
 
 **Service**: Event Service  
-**Port**: 8081  
-**Base URL**: `http://localhost:8081`  
+**Port**: 8083  
+**Base URL**: `http://localhost:8083`  
 **Version**: 1.0.0  
 
 ### Technologies
@@ -499,7 +499,7 @@ Un fichier de tests complet est disponible: `event-service.http`
 
 ```bash
 # 1. Créer un événement
-curl -X POST http://localhost:8081/api/events \
+curl -X POST http://localhost:8083/api/events \
   -H "Content-Type: application/json" \
   -d '{
     "titre": "Test Event",
@@ -514,10 +514,10 @@ curl -X POST http://localhost:8081/api/events \
   }'
 
 # 2. Récupérer tous les événements
-curl http://localhost:8081/api/events
+curl http://localhost:8083/api/events
 
 # 3. Publier l'événement (déclenche RabbitMQ)
-curl -X POST http://localhost:8081/api/events/1/publish
+curl -X POST http://localhost:8083/api/events/1/publish
 ```
 
 ---
