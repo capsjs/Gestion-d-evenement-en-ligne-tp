@@ -1,6 +1,9 @@
 package com.eventplatform.billetterie_service.service;
 
 import com.eventplatform.billetterie_service.model.Ticket;
+import com.eventplatform.billetterie_service.dto.TicketBookedEvent;
+import com.eventplatform.billetterie_service.dto.TicketCancelledEvent;
+import com.eventplatform.billetterie_service.messaging.TicketEventPublisher;
 import com.eventplatform.billetterie_service.model.EtatTicket;
 import com.eventplatform.billetterie_service.model.EventSeat;
 import com.eventplatform.billetterie_service.model.TypeTicket;
@@ -17,10 +20,16 @@ public class BilletterieService {
 
     private final TicketRepository ticketRepository;
     private final EventSeatRepository eventSeatRepository;
+    private final TicketEventPublisher ticketEventPublisher;
 
-    public BilletterieService(TicketRepository ticketRepository, EventSeatRepository eventSeatRepository) {
+    public BilletterieService(
+            TicketRepository ticketRepository,
+            EventSeatRepository eventSeatRepository,
+            TicketEventPublisher ticketEventPublisher
+    ) {
         this.ticketRepository = ticketRepository;
         this.eventSeatRepository = eventSeatRepository;
+        this.ticketEventPublisher = ticketEventPublisher;
     }
 
     @Transactional
@@ -37,9 +46,21 @@ public class BilletterieService {
         seat.setRemainingSeats(seat.getRemainingSeats() - 1);
         eventSeatRepository.save(seat);
 
-        //Création de ticket
+        // Création de ticket
         Ticket ticket = new Ticket(eventId, userId, type, prix);
-        return ticketRepository.save(ticket);
+        ticket = ticketRepository.save(ticket);
+
+        // Event
+        ticketEventPublisher.publishTicketBooked(
+                new TicketBookedEvent(
+                        ticket.getId(),
+                        ticket.getEventId(),
+                        ticket.getUserId(),
+                        ticket.getPrix()
+                )
+        );
+
+        return ticket;
     }
 
     @Transactional
@@ -48,6 +69,17 @@ public class BilletterieService {
                 .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
         t.setEtat(EtatTicket.ANNULE);
-        return ticketRepository.save(t);
+        t = ticketRepository.save(t);
+
+        // EVENT
+        ticketEventPublisher.publishTicketCancelled(
+                new TicketCancelledEvent(
+                        t.getId(),
+                        t.getEventId(),
+                        t.getUserId()
+                )
+        );
+
+        return t;
     }
 }

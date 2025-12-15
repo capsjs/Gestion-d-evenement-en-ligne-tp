@@ -3,17 +3,11 @@ package com.eventplatform.billetterie_service.model;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 @Entity
-@Getter
-@Setter
-@NoArgsConstructor
 public class Ticket {
 
-     @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
 
@@ -29,6 +23,9 @@ public class Ticket {
     @Enumerated(EnumType.STRING)
     private EtatTicket etat;
 
+    public Ticket() {
+    }
+
     public Ticket(UUID eventId, UUID userId, TypeTicket type, Float prix) {
         this.eventId = eventId;
         this.userId = userId;
@@ -38,4 +35,31 @@ public class Ticket {
         this.qrCode = UUID.randomUUID().toString();
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public UUID getEventId() {
+        return eventId;
+    }
+    public TypeTicket getType() {
+        return type;
+    }
+    public UUID getUserId() {
+        return userId;
+    }
+    public Float getPrix() {
+        return prix;
+    }
+    public String getqrCode() {
+        return qrCode;
+    }
+
+    public EtatTicket getEtat() {
+        return etat;
+    }
+
+    public void setEtat(EtatTicket etat) {
+        this.etat = etat;
+    }
 }
