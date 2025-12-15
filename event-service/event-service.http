@@ -1,0 +1,220 @@
+### Variables
+@baseUrl = http://localhost:8083
+@contentType = application/json
+
+### ========================================
+### PARTIE 1: TESTS DES ENDPOINTS PUBLICS
+### ========================================
+
+### 1. GET - Récupérer tous les événements
+GET {{baseUrl}}/api/events
+
+### 2. POST - Créer un événement (Concert)
+# @name createConcert
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Concert de Jazz",
+  "description": "Un superbe concert de jazz en plein air avec des artistes internationaux",
+  "dateDebut": "2025-12-20T19:00:00",
+  "dateFin": "2025-12-20T23:00:00",
+  "lieu": "Paris, Bercy",
+  "categorie": "CONCERT",
+  "statut": "BROUILLON",
+  "capaciteMax": 500,
+  "organisateurId": 1,
+  "imageUrl": "https://example.com/concert-jazz.jpg"
+}
+
+### 3. POST - Créer un autre événement (Formation)
+# @name createFormation
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Formation Spring Boot",
+  "description": "Formation complète sur Spring Boot et les microservices",
+  "dateDebut": "2025-12-15T09:00:00",
+  "dateFin": "2025-12-15T17:00:00",
+  "lieu": "Lyon",
+  "categorie": "FORMATION",
+  "statut": "BROUILLON",
+  "capaciteMax": 30,
+  "organisateurId": 1,
+  "imageUrl": "https://example.com/spring-boot.jpg"
+}
+
+### 3. POST - Créer un autre événement test rabbit
+# @name createFormation
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "test rabbit 4",
+  "description": "Formation complète sur Spring Boot et les microservices",
+  "dateDebut": "2025-12-19T09:00:00",
+  "dateFin": "2025-12-19T17:00:00",
+  "lieu": "Lyon",
+  "categorie": "FORMATION",
+  "statut": "BROUILLON",
+  "capaciteMax": 30,
+  "organisateurId": 1,
+  "imageUrl": "https://example.com/spring-boot.jpg"
+}
+
+### 4. GET - Récupérer un événement par ID (utilise l'ID du concert créé)
+@concertId = {{createConcert.response.body.id}}
+GET {{baseUrl}}/api/events/{{concertId}}
+
+### 5. PUT - Mettre à jour un événement
+PUT {{baseUrl}}/api/events/{{concertId}}
+Content-Type: {{contentType}}
+
+{
+  "titre": "Concert de Jazz - COMPLET",
+  "description": "Un superbe concert de jazz en plein air avec des artistes internationaux - DERNIÈRES PLACES",
+  "lieu": "Paris, AccorHotels Arena"
+}
+
+### 6. POST - Publier un événement (passer de BROUILLON à PUBLIE)
+# ⚠️ Ceci déclenchera un événement RabbitMQ "event.created"
+POST {{baseUrl}}/api/events/{{concertId}}/publish
+
+### 6b. POST - Publier un événement avec ID fixe (test RabbitMQ)
+# ⚠️ TEST RABBITMQ - Publiez l'événement ID 1 pour déclencher l'événement RabbitMQ
+POST {{baseUrl}}/api/events/1/publish
+
+### 6c. POST - Publier un événement avec ID fixe 2 (test RabbitMQ)
+POST {{baseUrl}}/api/events/2/publish
+
+### 6d. POST - Publier un événement avec ID fixe 3 (test RabbitMQ)
+POST {{baseUrl}}/api/events/4/publish
+
+### 7. POST - Annuler un événement (utilise l'ID de la formation)
+# ⚠️ Ceci déclenchera un événement RabbitMQ "event.cancelled"
+@formationId = {{createFormation.response.body.id}}
+POST {{baseUrl}}/api/events/{{formationId}}/cancel
+Content-Type: {{contentType}}
+
+{
+  "reason": "Annulé pour raisons météorologiques"
+}
+
+### 8. GET - Récupérer les événements à venir
+GET {{baseUrl}}/api/events/upcoming
+
+### 9. GET - Récupérer les événements en cours
+GET {{baseUrl}}/api/events/ongoing
+
+### 10. GET - Rechercher des événements par catégorie
+GET {{baseUrl}}/api/events/search?categorie=CONCERT
+
+### 11. GET - Rechercher des événements par organisateur
+GET {{baseUrl}}/api/events/search?organisateurId=1
+
+### 12. DELETE - Supprimer un événement (seulement en BROUILLON)
+# NOTE: Créez d'abord un événement à supprimer avec le test #13
+@theatreId = {{createTheatre.response.body.id}}
+DELETE {{baseUrl}}/api/events/{{theatreId}}
+
+### 13. POST - Créer un événement THEATRE
+# @name createTheatre
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Molière - Le Misanthrope",
+  "description": "Représentation classique de la pièce de Molière",
+  "dateDebut": "2025-12-18T20:00:00",
+  "dateFin": "2025-12-18T22:30:00",
+  "lieu": "Comédie Française, Paris",
+  "categorie": "THEATRE",
+  "statut": "BROUILLON",
+  "capaciteMax": 200,
+  "organisateurId": 2,
+  "imageUrl": "https://example.com/moliere.jpg"
+}
+
+### 14. POST - Créer un événement SPORT
+# @name createSport
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Marathon de Paris 2026",
+  "description": "42ème édition du marathon de Paris",
+  "dateDebut": "2026-04-05T08:00:00",
+  "dateFin": "2026-04-05T15:00:00",
+  "lieu": "Paris - Champs-Élysées",
+  "categorie": "SPORT",
+  "statut": "BROUILLON",
+  "capaciteMax": 50000,
+  "organisateurId": 3,
+  "imageUrl": "https://example.com/marathon.jpg"
+}
+
+### 15. POST - Test validation - Titre trop court (doit échouer)
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "AB",
+  "description": "Test validation",
+  "dateDebut": "2025-12-20T19:00:00",
+  "dateFin": "2025-12-20T23:00:00",
+  "lieu": "Paris",
+  "categorie": "CONCERT",
+  "statut": "BROUILLON",
+  "capaciteMax": 100,
+  "organisateurId": 1
+}
+
+### 16. POST - Test validation - Date dans le passé (doit échouer)
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Événement passé",
+  "description": "Test validation",
+  "dateDebut": "2020-01-01T19:00:00",
+  "dateFin": "2020-01-01T23:00:00",
+  "lieu": "Paris",
+  "categorie": "CONCERT",
+  "statut": "BROUILLON",
+  "capaciteMax": 100,
+  "organisateurId": 1
+}
+
+### 17. POST - Test doublon - Même événement (doit échouer avec 409)
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "Concert de Jazz",
+  "description": "Un superbe concert de jazz en plein air avec des artistes internationaux",
+  "dateDebut": "2025-12-20T19:00:00",
+  "dateFin": "2025-12-20T23:00:00",
+  "lieu": "Paris, Bercy",
+  "categorie": "CONCERT",
+  "statut": "BROUILLON",
+  "capaciteMax": 500,
+  "organisateurId": 1,
+  "imageUrl": "https://example.com/concert-jazz.jpg"
+}
+
+### ========================================
+### PARTIE 2: ENDPOINTS INTERNES (Inter-services)
+### Ces endpoints sont utilisés par les autres microservices
+### ========================================
+
+### 18. POST - Réduire les places disponibles (appelé par billetterie-service)
+# Simule une réservation de 5 places
+POST {{baseUrl}}/api/events/internal/{{concertId}}/decrease-seats?quantity=5
+
+### 19. POST - Augmenter les places disponibles (appelé par billetterie-service)
+# Simule une annulation de réservation de 2 places
+POST {{baseUrl}}/api/events/internal/{{concertId}}/increase-seats?quantity=2
+
+### 20. GET - Vérifier les places après modification
+GET {{baseUrl}}/api/events/{{concertId}}
