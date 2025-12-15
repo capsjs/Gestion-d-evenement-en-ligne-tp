@@ -1,5 +1,7 @@
 package com.eventplatform.userservice.user;
 
+import jakarta.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,30 +20,54 @@ public class UserController {
 
     // GET /api/users
     @GetMapping
-    public List<User> getAllUsers() {
+    public List<UserResponse> getAllUsers() {
         return userService.getAllUsers();
     }
 
     // GET /api/users/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         return userService.getUserById(id)
-                .map(ResponseEntity::ok)
+                .map(userResponse -> ResponseEntity.ok(userResponse))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     // POST /api/users
     @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        User created = userService.createUser(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<?> createUser(@RequestBody UserRequest request) {
+        try {
+            UserResponse created = userService.createUser(request);
+            return ResponseEntity.status(HttpStatus.CREATED).body(created);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
+    }
+
+    //POST/api/users/login
+    @PostMapping("/login")
+    public ResponseEntity<UserResponse> login(@RequestBody LoginRequest request) {
+        return userService.login(request.getEmail(), request.getPassword())
+                .map(userResponse -> ResponseEntity.ok(userResponse))
+                .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED).build());
     }
 
     // PUT /api/users/{id}
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        User updated = userService.updateUser(id, user);
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id,
+                                                   @RequestBody UserRequest request) {
+        UserResponse updated = userService.updateUser(id, request);
         return ResponseEntity.ok(updated);
+    }
+
+    // PATCH /api/users/{id}/role
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<?> updateUserRole(@PathVariable Long id, @Valid @RequestBody RoleUpdateRequest request) {
+        try {
+            UserResponse updated = userService.updateUserRole(id, request.getRole());
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
     }
 
     // DELETE /api/users/{id}
