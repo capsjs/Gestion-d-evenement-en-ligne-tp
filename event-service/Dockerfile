@@ -1,27 +1,13 @@
-FROM eclipse-temurin:21-jdk-alpine AS build
-
+# Stage 1: Build
+FROM maven:3.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
-
-# Copier le wrapper Maven et les fichiers de configuration
-COPY mvnw .
-COPY .mvn .mvn
 COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Télécharger les dépendances (layer mis en cache)
-RUN ./mvnw dependency:go-offline -B
-
-# Copier le code source
-COPY src src
-
-# Construire l'application
-RUN ./mvnw clean package -DskipTests
-
+# Stage 2: Run
 FROM eclipse-temurin:21-jre-alpine
-
 WORKDIR /app
-
 COPY --from=build /app/target/*.jar app.jar
-
 EXPOSE 8083
-
 ENTRYPOINT ["java", "-jar", "app.jar"]
