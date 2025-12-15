@@ -1,22 +1,19 @@
-package com.eventplatform.paiement_service.mapper;
+package com.eventplatform.paiement_service.web.mapper;
 
-import com.eventplatform.paiement_service.DTO.PaymentResponseDTO;
 import com.eventplatform.paiement_service.entities.Payment;
+import com.eventplatform.paiement_service.web.dto.PaymentResponseDTO;
+import org.springframework.stereotype.Component;
 
 @Component
 public class PaymentMapper {
-    public PaymentResponseDTO toDTO(Payment payment) {
-
-        if (payment == null) {
-            return null;
-        }
-
-        PaymentResponseDTO dto = new PaymentResponseDTO();
-        dto.setBookingId(payment.getBookingId());
-        dto.setAmount(payment.getAmount());
-        dto.setCurrency(payment.getCurrency());
-        dto.setStatus(payment.getStatus());
-        dto.setProcessedAt(payment.getCreatedAt());
-        return dto;
+    public PaymentResponseDTO toDTO(Payment entity) {
+        if (entity == null) return null;
+        return new PaymentResponseDTO(
+            entity.getBookingId(),
+            entity.getAmount(),
+            entity.getCurrency(),
+            entity.getStatus(),
+            entity.getCreatedAt()
+        );
     }
 }

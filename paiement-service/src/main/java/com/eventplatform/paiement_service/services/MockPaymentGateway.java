@@ -1,18 +1,16 @@
-// Interface
-public interface PaymentGateway {
-    PaymentResult process(BigDecimal amount, String currency);
-}
+package com.eventplatform.paiement_service.services;
 
-// Implémentation Mock (Simulation pour le prof)
+import com.eventplatform.paiement_service.entities.PaymentStatus;
+import org.springframework.stereotype.Service;
+import java.math.BigDecimal;
+import java.util.UUID;
+
 @Service
 public class MockPaymentGateway implements PaymentGateway {
+
     @Override
     public PaymentResult process(BigDecimal amount, String currency) {
-        // Simulation : 90% de chance de succès, 10% d'échec (pour tester les bugs)
-        if (Math.random() > 0.1) {
-            return new PaymentResult("TX_" + UUID.randomUUID(), PaymentStatus.APPROVED);
-        } else {
-            return new PaymentResult(null, PaymentStatus.REJECTED);
-        }
+        // Simulation : on génère un faux ID de transaction
+        return new PaymentResult("TX_" + UUID.randomUUID(), PaymentStatus.APPROVED);
     }
 }
