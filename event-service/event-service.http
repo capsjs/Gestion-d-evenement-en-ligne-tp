@@ -45,6 +45,24 @@ Content-Type: {{contentType}}
   "imageUrl": "https://example.com/spring-boot.jpg"
 }
 
+### 3. POST - Créer un autre événement test rabbit
+# @name createFormation
+POST {{baseUrl}}/api/events
+Content-Type: {{contentType}}
+
+{
+  "titre": "test rabbit 4",
+  "description": "Formation complète sur Spring Boot et les microservices",
+  "dateDebut": "2025-12-19T09:00:00",
+  "dateFin": "2025-12-19T17:00:00",
+  "lieu": "Lyon",
+  "categorie": "FORMATION",
+  "statut": "BROUILLON",
+  "capaciteMax": 30,
+  "organisateurId": 1,
+  "imageUrl": "https://example.com/spring-boot.jpg"
+}
+
 ### 4. GET - Récupérer un événement par ID (utilise l'ID du concert créé)
 @concertId = {{createConcert.response.body.id}}
 GET {{baseUrl}}/api/events/{{concertId}}
@@ -62,6 +80,16 @@ Content-Type: {{contentType}}
 ### 6. POST - Publier un événement (passer de BROUILLON à PUBLIE)
 # ⚠️ Ceci déclenchera un événement RabbitMQ "event.created"
 POST {{baseUrl}}/api/events/{{concertId}}/publish
+
+### 6b. POST - Publier un événement avec ID fixe (test RabbitMQ)
+# ⚠️ TEST RABBITMQ - Publiez l'événement ID 1 pour déclencher l'événement RabbitMQ
+POST {{baseUrl}}/api/events/1/publish
+
+### 6c. POST - Publier un événement avec ID fixe 2 (test RabbitMQ)
+POST {{baseUrl}}/api/events/2/publish
+
+### 6d. POST - Publier un événement avec ID fixe 3 (test RabbitMQ)
+POST {{baseUrl}}/api/events/4/publish
 
 ### 7. POST - Annuler un événement (utilise l'ID de la formation)
 # ⚠️ Ceci déclenchera un événement RabbitMQ "event.cancelled"

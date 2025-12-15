@@ -7,32 +7,46 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import lombok.extern.slf4j.Slf4j;
+import jakarta.annotation.PostConstruct;
 
 /**
  * Configuration RabbitMQ pour l'architecture Event-Driven.
- * Définit les exchanges, queues et bindings pour la communication inter-services.
+ * Définit les exchanges, queues et bindings pour la communication
+ * inter-services.
  */
 @Configuration
+@Slf4j
 public class RabbitMQConfig {
 
     // Noms des exchanges
     public static final String EVENT_EXCHANGE = "event.exchange";
-    
+
     // Noms des queues
     public static final String EVENT_CREATED_QUEUE = "event.created.queue";
     public static final String EVENT_UPDATED_QUEUE = "event.updated.queue";
     public static final String EVENT_CANCELLED_QUEUE = "event.cancelled.queue";
-    
+
     // Routing keys
     public static final String EVENT_CREATED_ROUTING_KEY = "event.created";
     public static final String EVENT_UPDATED_ROUTING_KEY = "event.updated";
     public static final String EVENT_CANCELLED_ROUTING_KEY = "event.cancelled";
+
+    @PostConstruct
+    public void init() {
+        log.info("====================================================");
+        log.info("RabbitMQ Configuration initialized");
+        log.info("Exchange: {}", EVENT_EXCHANGE);
+        log.info("Queues: {}, {}, {}", EVENT_CREATED_QUEUE, EVENT_UPDATED_QUEUE, EVENT_CANCELLED_QUEUE);
+        log.info("====================================================");
+    }
 
     /**
      * Exchange principal pour tous les événements métier
      */
     @Bean
     public TopicExchange eventExchange() {
+        log.info("Creating TopicExchange: {}", EVENT_EXCHANGE);
         return new TopicExchange(EVENT_EXCHANGE);
     }
 

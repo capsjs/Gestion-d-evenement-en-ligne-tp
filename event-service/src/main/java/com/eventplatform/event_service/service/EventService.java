@@ -1,6 +1,9 @@
 package com.eventplatform.event_service.service;
 
 import com.eventplatform.event_service.dto.*;
+import com.eventplatform.event_service.dto.events.EventCancelledEvent;
+import com.eventplatform.event_service.dto.events.EventCreatedEvent;
+import com.eventplatform.event_service.dto.events.EventUpdatedEvent;
 import com.eventplatform.event_service.exception.*;
 import com.eventplatform.event_service.model.Event;
 import com.eventplatform.event_service.model.EventStatus;
@@ -27,6 +30,7 @@ public class EventService {
 
   private final EventRepository eventRepository;
   private final EventMapper eventMapper;
+  private final EventPublisher eventPublisher;
 
   /**
    * Crée un nouvel événement en mode brouillon
@@ -160,6 +164,19 @@ public class EventService {
 
     log.info("Événement mis à jour avec succès, ID: {}", event.getId());
 
+    // Publier l'événement de mise à jour vers RabbitMQ
+    EventUpdatedEvent eventUpdatedEvent = EventUpdatedEvent.builder()
+        .eventId(event.getId())
+        .titre(event.getTitre())
+        .dateDebut(event.getDateDebut())
+        .dateFin(event.getDateFin())
+        .lieu(event.getLieu())
+        .changementsDescription("Événement modifié")
+        .timestamp(LocalDateTime.now())
+        .build();
+
+    eventPublisher.publishEventUpdated(eventUpdatedEvent);
+
     return eventMapper.toResponse(event);
   }
 
@@ -181,6 +198,21 @@ public class EventService {
 
     log.info("Événement publié avec succès, ID: {}", event.getId());
 
+    // Publier l'événement de création vers RabbitMQ
+    EventCreatedEvent eventCreatedEvent = EventCreatedEvent.builder()
+        .eventId(event.getId())
+        .titre(event.getTitre())
+        .description(event.getDescription())
+        .dateDebut(event.getDateDebut())
+        .dateFin(event.getDateFin())
+        .lieu(event.getLieu())
+        .categorie(event.getCategorie())
+        .organisateurId(event.getOrganisateurId())
+        .timestamp(LocalDateTime.now())
+        .build();
+
+    eventPublisher.publishEventCreated(eventCreatedEvent);
+
     return eventMapper.toResponse(event);
   }
 
@@ -201,6 +233,17 @@ public class EventService {
     event = eventRepository.save(event);
 
     log.info("Événement annulé avec succès, ID: {}", event.getId());
+
+    // Publier l'événement d'annulation vers RabbitMQ
+    EventCancelledEvent eventCancelledEvent = EventCancelledEvent.builder()
+        .eventId(event.getId())
+        .titre(event.getTitre())
+        .raisonAnnulation(reason)
+        .organisateurId(event.getOrganisateurId())
+        .timestamp(LocalDateTime.now())
+        .build();
+
+    eventPublisher.publishEventCancelled(eventCancelledEvent);
 
     return eventMapper.toResponse(event);
   }
