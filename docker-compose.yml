@@ -138,6 +138,22 @@ services:
       EVENT_SERVICE_URL: http://event-service:8084
       SERVER_PORT: 8081
 
+  # --- 6. API GATEWAY ---
+  api-gateway:
+    build:
+      context: ./api-gateway
+    container_name: api_gateway
+    ports:
+      - "8080:8080"
+    depends_on:
+      - event-service
+      - user-service
+      - billetterie-service
+      - paiement-service
+      - notification-service
+    environment:
+      SERVER_PORT: 8080
+
   # --- INFRASTRUCTURE PARTAGÉE ---
   rabbitmq:
     image: rabbitmq:3-management
