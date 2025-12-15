@@ -1,10 +1,13 @@
-FROM eclipse-temurin:21-jdk
-
-# Crée le répertoire de travail
+# Stage 1: Build
+FROM maven:3.9-eclipse-temurin-21-alpine AS build
 WORKDIR /app
+COPY pom.xml .
+COPY src ./src
+RUN mvn clean package -DskipTests
 
-# Copie le jar construit dans le conteneur
-COPY target/billetterie-service-0.0.1-SNAPSHOT.jar app.jar
-
-# Définit la commande à exécuter au lancement du conteneur
+# Stage 2: Run
+FROM eclipse-temurin:21-jre-alpine
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
