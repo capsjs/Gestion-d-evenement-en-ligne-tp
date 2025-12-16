@@ -1,6 +1,7 @@
 package com.eventplatform.billetterie_service.service;
 
 import com.eventplatform.billetterie_service.model.Ticket;
+import com.eventplatform.billetterie_service.dto.EventUpdatedEvent;
 import com.eventplatform.billetterie_service.dto.TicketBookedEvent;
 import com.eventplatform.billetterie_service.dto.TicketCancelledEvent;
 import com.eventplatform.billetterie_service.messaging.TicketEventPublisher;
@@ -10,6 +11,7 @@ import com.eventplatform.billetterie_service.model.TypeTicket;
 import com.eventplatform.billetterie_service.repository.TicketRepository;
 import com.eventplatform.billetterie_service.repository.EventSeatRepository;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -80,6 +82,7 @@ public class BilletterieService {
         EventSeat seat = eventSeatRepository.findById(eventId)
                 .orElseThrow(() -> new RuntimeException("Evenement non trouvé"));
         seat.setRemainingSeats(seat.getRemainingSeats() + 1);
+        eventSeatRepository.save(seat);
 
         // EVENT
         ticketEventPublisher.publishTicketCancelled(
@@ -93,16 +96,46 @@ public class BilletterieService {
 
     @Transactional
     public void confirmTicket(UUID ticketId) {
-    Ticket ticket = ticketRepository.findById(ticketId)
-            .orElseThrow(() -> new RuntimeException("Ticket not found"));
+            Ticket ticket = ticketRepository.findById(ticketId)
+                            .orElseThrow(() -> new RuntimeException("Ticket not found"));
 
-    // On accepte la confirmation seulement si le ticket est réservé
-    if (ticket.getEtat() != EtatTicket.RESERVE) {
-        throw new RuntimeException("Ticket non confirmable");
+            // On accepte la confirmation seulement si le ticket est réservé
+            if (ticket.getEtat() != EtatTicket.RESERVE) {
+                    throw new RuntimeException("Ticket non confirmable");
+            }
+
+            ticket.setEtat(EtatTicket.PAYE);
+            ticketRepository.save(ticket);
     }
 
-    ticket.setEtat(EtatTicket.PAYE);
-    ticketRepository.save(ticket);
-}
+    @Transactional
+    public void cancelTicketsForEvent(UUID eventId) {
+
+            List<Ticket> tickets = ticketRepository.findByEventId(eventId);
+
+            for (Ticket t : tickets) {
+                    if (t.getEtat() == EtatTicket.PAYE || t.getEtat() == EtatTicket.RESERVE) {
+                            t.setEtat(EtatTicket.ANNULE);
+                            ticketEventPublisher.publishTicketCancelled(
+                                            new TicketCancelledEvent(t.getId(), t.getEventId(), t.getUserId()));
+                    }
+            }
+
+            ticketRepository.saveAll(tickets);
+    }
+
+    @Transactional
+    public void handleEventUpdate(EventUpdatedEvent event) {
+            EventSeat seat = eventSeatRepository.findByEventId(event.getEventId())
+                        .orElseThrow(() -> new RuntimeException("Evenement non trouvé"));
+            // seat.setDateDebut(event.getDateDebut());
+            // seat.setDateFin(event.getDateFin());
+            // seat.setLieu(event.getLieu());
+
+            eventSeatRepository.save(seat);
+    }
+
+
+
 
 }
