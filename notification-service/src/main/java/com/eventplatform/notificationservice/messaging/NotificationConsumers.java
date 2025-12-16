@@ -20,7 +20,10 @@ public class NotificationConsumers {
 
     @Bean
     public Consumer<EventCreatedIncoming> onEventCreated() {
-        return e -> service.send(NotificationEventAdapter.from(e));
+        return event -> {
+            System.out.println("EVENT CREATED REÇU");
+            System.out.println(event);
+        };
     }
 
     @Bean
