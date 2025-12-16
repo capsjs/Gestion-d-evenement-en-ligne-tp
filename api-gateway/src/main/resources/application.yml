@@ -23,7 +23,7 @@ spring:
             - id: billetterie-service
               uri: http://billetterie-service:8082
               predicates:
-                - Path=/api/billetterie/**,/api/tickets/**
+                - Path=/api/tickets/**
 
             - id: payment-service
               uri: http://paiement-service:8083
